@@ -34,7 +34,6 @@ to setup-frascarelli
   clear-all
   set simulation-done false
   setup-state-mappings
-  setup-precedence
   set-patch-size 40
   set num-states 7
   set row max-pycor
@@ -73,7 +72,6 @@ to setup-rizzi
   clear-all
   set simulation-done false  ; Reset the flag to indicate simulation is not done
   setup-state-mappings
-  setup-precedence
   set-patch-size 40
   set num-states 7  ;; Total states
   set row max-pycor
@@ -154,7 +152,6 @@ to setup-manual-frascarelli
   clear-all
   set simulation-done false  ; Reset the flag to indicate simulation is not done
   setup-state-mappings
-  setup-precedence
   set-patch-size 40
   set num-states 7  ;; Total states
   set row max-pycor
@@ -206,14 +203,13 @@ to setup-manual-rizzi
   clear-all
   set simulation-done false  ; Reset the flag to indicate simulation is not done
   setup-state-mappings
-  setup-precedence
   set-patch-size 40
   set num-states 7  ;; Total states
   set row max-pycor
   set previous-states []
 
   ;; Prompt the user to enter the sequence in a single line
-  let input-sequence user-input "Enter the sequence (e.g., 'QEmb Top Top Foc Mod'):"
+  let input-sequence user-input "Enter the sequence (e.g., 'QEmb Top Top Foc Mod Int'):"
 
   print (word "User entered sequence: " input-sequence)
 
@@ -282,14 +278,13 @@ to setup-predefined-frascarelli
   clear-all
   set simulation-done false  ; Reset the flag to indicate simulation is not done
   setup-state-mappings
-  setup-precedence
   set-patch-size 40
   set num-states 7
   set row max-pycor
   set previous-states []
 
   ;; Predefined pattern:
-  let predefined-pattern [5 2 4 2 1 2]  ;
+  let predefined-pattern [5 6 2 4 6 3]  ;
 
   ;; Set the first row based on the predefined pattern
   ask patches with [pycor = row] [
@@ -319,14 +314,13 @@ to setup-predefined-rizzi
   clear-all
   set simulation-done false  ; Reset the flag to indicate simulation is not done
   setup-state-mappings
-  setup-precedence
   set-patch-size 40
   set num-states 7
   set row max-pycor
   set previous-states []
 
   ;; Predefined pattern:
-  let predefined-pattern [5 2 4 2 1 2]  ;
+  let predefined-pattern [5 4 2 3 2 2]  ;
 
   ;; Set the first row based on the predefined pattern
   ask patches with [pycor = row] [
@@ -364,7 +358,6 @@ end
 to go-cascade
   ;; Check if the simulation is already complete
   if simulation-done [
-    user-message "Simulation has already reached its final state."
     stop  ; Stop further execution
   ]
 
@@ -389,8 +382,8 @@ to go-cascade
     ;; If no changes were made in the current row, process the final row and stop
     if not changes-made [
       print "No changes made. This is the final row."
+      user-message "Cascade derivation complete."
       set simulation-done true  ; Set the flag to true
-      user-message "Simulation has already reached its final state."
       tick  ; Ensure the final row is visually updated before stopping
       stop  ; End the simulation
     ]
@@ -452,7 +445,6 @@ end
 
 to go-pairwise
   if simulation-done [
-    user-message "Simulation has already reached its final state."
     stop
   ]
 
@@ -634,30 +626,6 @@ to-report label-to-state [input-label]
   report -1  ;; Return -1 for unknown labels
 end
 
-to setup-precedence
-  set precedence-hierarchy table:make
-
-  if reference-model = "Frascarelli 2012" [
-    table:put precedence-hierarchy 1 1
-    table:put precedence-hierarchy 2 2
-    table:put precedence-hierarchy 3 3
-    table:put precedence-hierarchy 4 4
-    table:put precedence-hierarchy 5 5
-    table:put precedence-hierarchy 6 6
-    table:put precedence-hierarchy 7 7
-  ]
-
-  if reference-model = "Rizzi & Bocci 2017" [
-    table:put precedence-hierarchy 1 1
-    table:put precedence-hierarchy 2 999
-    table:put precedence-hierarchy 3 2
-    table:put precedence-hierarchy 4 3
-    table:put precedence-hierarchy 5 4
-    table:put precedence-hierarchy 6 5
-    table:put precedence-hierarchy 7 6
-  ]
-end
-
 
 to-report should-swap? [left-state right-state]
   if left-state = right-state [report false]
@@ -677,12 +645,12 @@ to-report should-swap? [left-state right-state]
   if reference-model = "Rizzi & Bocci 2017" [
     let pairs [
       [1 2] [1 3] [1 4] [1 5] [1 6] [1 7]
+      [2 6] [2 7]
       [3 4] [3 5] [3 6] [3 7]
       [4 5] [4 6] [4 7]
       [5 6] [5 7]
       [6 7]
-      [2 7]
-    ]
+      ]
     report member? (list right-state left-state) pairs
   ]
 
@@ -794,8 +762,6 @@ to print-row-states
   ;; Add a blank line after the block of rows for clarity
   print ""
 end
-
-
 
 
 
@@ -944,7 +910,7 @@ CHOOSER
 update-method
 update-method
 "Pairwise" "Cascade"
-0
+1
 
 TEXTBOX
 27
